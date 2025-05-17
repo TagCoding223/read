@@ -20,13 +20,14 @@ const Navbar: React.FC = () => {
         { href: "/about", label: "About" },
         { href: "/contact", label: "Contact" },
     ]
+    const siteName = process.env.SITE_NAME
     return (
         <nav className="w-full dark:[bg-blue-900 backdrop-blur] shadow-md backdrop-blur sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Site Name */}
                     <div className="flex-shrink-0 text-2xl font-bold text-blue-600">
-                        Read
+                        {siteName}
                     </div>
                     {/* Center Nav Links */}
                     <div className="hidden md:flex space-x-8 mx-auto">

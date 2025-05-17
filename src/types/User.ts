@@ -11,7 +11,7 @@ type User = {
     phoneNumber: string;
     password: string;
     gender: Gender;
-    avater: string;
+    avatar: string;
     bio: string;
     dob: Date;
 };
