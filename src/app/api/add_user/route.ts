@@ -16,8 +16,7 @@ export async function POST(req:Request) {
     const id = await getId()
     console.log("id: ",id)
     const prisma = new PrismaClient()
-    const userData: any = { id, name, email, phoneNumber, password, gender, avatar, bio }; // use with mysql
-    // const userData: any = { name, email, phoneNumber, password, gender, avatar, bio }; // use with mongodb
+    const userData: any = { id, name, email, phoneNumber, password, gender, avatar, bio }; // use for mongodb and mysql both
     if (finalDob !== null) {
         userData.dob = finalDob;
     }

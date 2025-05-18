@@ -22,3 +22,15 @@ model user {
   dob         DateTime?
 }
 
+// User Model for mysql
+// model user {
+//   id          String   @id @map("_id") @db.VarChar(255)
+//   name        String   @db.VarChar(255)
+//   email       String   @unique(map: "email") @db.VarChar(255)
+//   phoneNumber String   @unique(map: "phoneNumber") @db.Char(15)
+//   password    String   @db.VarChar(255)
+//   gender      String   @db.Char(15)
+//   avatar      String   @db.VarChar(255)
+//   bio         String   @db.VarChar(255)
+//   dob         DateTime @db.Date
+// }
