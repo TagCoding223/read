@@ -4,18 +4,18 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model user {
-  id          String   @id @map("_id") @default(uuid()) @db.VarChar(255)
-  name        String   @db.VarChar(255)
-  email       String   @unique(map: "email") @db.VarChar(255)
-  phoneNumber String   @unique(map: "phoneNumber") @db.Char(15)
-  password    String   @db.VarChar(255)
-  gender      String   @db.Char(15)
-  avatar      String   @db.VarChar(255)
-  bio         String   @db.VarChar(255)
-  dob         DateTime @db.Date
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  email       String
+  phoneNumber String
+  password    String
+  gender      String
+  avatar      String
+  bio         String
+  dob         DateTime?
 }

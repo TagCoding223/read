@@ -7,9 +7,10 @@ export async function POST(req:Request) {
     const { name, email, phoneNumber, password, gender, avatar, bio, dob } = body
 
     const finalDob = dob ? new Date(dob).toISOString() : null;
-    const id = randomUUID();
+    // const id = randomUUID();
     const prisma = new PrismaClient()
-    const userData: any = { id, name, email, phoneNumber, password, gender, avatar, bio };
+    // const userData: any = { id, name, email, phoneNumber, password, gender, avatar, bio };
+    const userData: any = { name, email, phoneNumber, password, gender, avatar, bio };
     if (finalDob !== null) {
         userData.dob = finalDob;
     }
