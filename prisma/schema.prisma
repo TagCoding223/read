@@ -5,9 +5,11 @@ generator client {
 
 datasource db {
   provider = "mongodb"
+  // provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
+// User Model for mongo db atlas
 model user {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name        String
@@ -19,3 +21,4 @@ model user {
   bio         String
   dob         DateTime?
 }
+
