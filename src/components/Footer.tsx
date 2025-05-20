@@ -4,7 +4,7 @@ import React from 'react'
 const Footer = () => {
     const siteName = process.env.SITE_NAME
     return (
-        <footer className="mt-16 w-full border-t border-gray-200 dark:border-gray-700 py-8 bg-white dark:bg-gray-900">
+        <footer className="w-full border-t border-gray-200 dark:border-gray-700 py-8 bg-white dark:bg-gray-900">
             <div className="max-w-4xl mx-auto px-4 flex flex-col md:flex-row items-center md:items-center justify-between gap-6 md:gap-4">
                 {/* Left: Brand/Year */}
                 <div className="flex items-center gap-2 order-1 md:order-1 w-full md:w-auto justify-center md:justify-start">

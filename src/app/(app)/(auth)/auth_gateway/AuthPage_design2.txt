@@ -1,0 +1,170 @@
+'use client'
+import { useState } from 'react';
+import { MdEmail } from 'react-icons/md';
+import { FaGoogle, FaFacebookF, FaMicrosoft } from 'react-icons/fa';
+import { IoEye, IoEyeOff } from 'react-icons/io5';
+
+function AuthPanel() {
+    const [showSignIn, setShowSignIn] = useState(true);
+    const [showPassword, setShowPassword] = useState(false);
+
+    return (
+        <div className="mt-2 min-h-screen flex items-center justify-center px-4">
+            <div className="relative w-full max-w-4xl min-h-[600px] flex flex-col md:flex-row items-center justify-center">
+
+                {/* Desktop Overlay Panels */}
+                <div
+                    className={`hidden md:flex absolute left-0 top-0 w-1/2 h-full items-center justify-center transition-all duration-700 ease-in-out z-20 ${
+                        showSignIn
+                            ? 'opacity-100 scale-100 pointer-events-auto'
+                            : 'opacity-0 pointer-events-none scale-95'
+                    }`}
+                >
+                    <div className='bg-[#e23e3e] w-full h-full rounded-l-2xl flex flex-col justify-center items-center gap-4 text-white'>
+                        <h3 className='font-semibold text-4xl'>Welcome to Sign In</h3>
+                        <p className='font-medium'>Don&apos;t have an account?</p>
+                        <button onClick={() => setShowSignIn(false)} className='w-24 h-10 rounded-full bg-white text-[#e23e3e] font-semibold'>
+                            Sign Up
+                        </button>
+                    </div>
+                </div>
+
+                <div
+                    className={`hidden md:flex absolute right-0 top-0 w-1/2 h-full items-center justify-center transition-all duration-700 ease-in-out z-20 ${
+                        showSignIn
+                            ? 'opacity-0 pointer-events-none scale-95'
+                            : 'opacity-100 scale-100 pointer-events-auto'
+                    }`}
+                >
+                    <div className='bg-[#e23e3e] w-full h-full rounded-r-2xl flex flex-col justify-center items-center gap-4 text-white'>
+                        <h3 className='font-semibold text-4xl'>Welcome to Sign Up</h3>
+                        <p className='font-medium'>Already have an account?</p>
+                        <button onClick={() => setShowSignIn(true)} className='w-24 h-10 rounded-full bg-white text-[#e23e3e] font-semibold'>
+                            Sign In
+                        </button>
+                    </div>
+                </div>
+
+                {/* Mobile Toggle Buttons */}
+                <div className="flex md:hidden mb-4 w-full justify-center gap-4 z-30">
+                    <button
+                        onClick={() => setShowSignIn(true)}
+                        className={`px-4 py-2 font-semibold rounded-lg ${
+                            showSignIn ? 'bg-[#e23e3e] text-white' : 'bg-gray-200'
+                        }`}
+                    >
+                        Sign In
+                    </button>
+                    <button
+                        onClick={() => setShowSignIn(false)}
+                        className={`px-4 py-2 font-semibold rounded-lg ${
+                            !showSignIn ? 'bg-[#e23e3e] text-white' : 'bg-gray-200'
+                        }`}
+                    >
+                        Sign Up
+                    </button>
+                </div>
+
+                {/* Sign Up Panel */}
+                {!showSignIn && (
+                    <div className="dark:bg-gray-900 relative w-full md:w-1/2 h-full bg-white/30 backdrop-blur-md rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none shadow-lg flex flex-col items-center justify-center px-6 py-10 md:px-8 z-10 border-2 border-[#e23e3e] md:border-r-0">
+                        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900 dark:text-gray-400">Sign Up</h2>
+                        <button className="w-full flex items-center justify-center gap-3 bg-blue-600 text-white py-3 rounded-lg mb-4 font-semibold hover:bg-blue-700 transition">
+                            <MdEmail className='w-5 h-5' />
+                            <span>Continue with Email</span>
+                        </button>
+
+                        <div className="flex items-center w-full my-4">
+                            <hr className="flex-grow border-gray-300" />
+                            <span className="mx-3 text-gray-500">or</span>
+                            <hr className="flex-grow border-gray-300" />
+                        </div>
+
+                        <button className="w-full flex items-center justify-center gap-3 bg-red-500 text-white py-3 rounded-lg mb-4 font-semibold hover:bg-red-600 transition">
+                            <FaGoogle />
+                            <span>Continue with Google</span>
+                        </button>
+                        <button className="w-full flex items-center justify-center gap-3 bg-blue-800 text-white py-3 rounded-lg mb-4 font-semibold hover:bg-blue-900 transition">
+                            <FaFacebookF />
+                            <span>Continue with Facebook</span>
+                        </button>
+                        <button className="w-full flex items-center justify-center gap-3 bg-green-700 text-white py-3 rounded-lg mb-4 font-semibold hover:bg-green-800 transition">
+                            <FaMicrosoft />
+                            <span>Continue with Microsoft</span>
+                        </button>
+
+                        <div className="mt-6 text-xs text-center text-gray-500 dark:text-gray-400 max-w-xs">
+                            By signing up, you agree to our{' '}
+                            <a href="/terms" className="underline hover:text-[#e23e3e]" target="_blank" rel="noopener noreferrer">
+                                Terms of Service
+                            </a>{' '}
+                            and{' '}
+                            <a href="/privacy" className="underline hover:text-[#e23e3e]" target="_blank" rel="noopener noreferrer">
+                                Privacy Policy
+                            </a>.
+                        </div>
+                    </div>
+                )}
+
+                {/* Sign In Panel */}
+                {showSignIn && (
+                    <div className="dark:bg-gray-900 relative w-full md:w-1/2 h-full bg-white/30 backdrop-blur-md rounded-b-2xl md:rounded-r-2xl md:rounded-bl-none shadow-lg flex flex-col items-center justify-center px-6 py-10 md:px-8 z-10 border-2 border-[#e23e3e] md:border-l-0">
+                        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-purple-700 dark:text-gray-400">Sign In</h2>
+                        <form className="w-full flex flex-col gap-4 mb-4">
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline focus:ring-2 focus:ring-gray-900 bg-white/60 backdrop-blur-sm dark:text-gray-300"
+                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    placeholder="Password"
+                                    className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline focus:ring-2 focus:ring-gray-900 bg-white/60 backdrop-blur-sm dark:text-gray-300 pr-12"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    tabIndex={-1}
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                >
+                                    {showPassword ? <IoEye /> : <IoEyeOff />}
+                                </button>
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
+                            >
+                                Sign In
+                            </button>
+                        </form>
+
+                        <div className="flex items-center w-full my-4">
+                            <hr className="flex-grow border-gray-300" />
+                            <span className="mx-3 text-gray-500">or</span>
+                            <hr className="flex-grow border-gray-300" />
+                        </div>
+
+                        <div className="w-full flex flex-col gap-3">
+                            <button className="w-full flex items-center justify-center gap-3 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition">
+                                <FaGoogle />
+                                <span>Sign in with Google</span>
+                            </button>
+                            <button className="w-full flex items-center justify-center gap-3 bg-blue-800 text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition">
+                                <FaFacebookF />
+                                <span>Sign in with Facebook</span>
+                            </button>
+                            <button className="w-full flex items-center justify-center gap-3 bg-green-700 text-white py-3 rounded-lg font-semibold hover:bg-green-800 transition">
+                                <FaMicrosoft />
+                                <span>Sign in with Microsoft</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default AuthPanel;
