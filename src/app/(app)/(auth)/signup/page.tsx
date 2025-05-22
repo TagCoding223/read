@@ -1,28 +1,22 @@
-'use client';
+"use client"
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { IoEye } from "react-icons/io5";
 import { IoEyeOff } from "react-icons/io5";
 import { MdOutlineRefresh } from "react-icons/md";
+import { useForm } from 'react-hook-form'
+import { UserModel } from '@/schema/UserModel';
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from 'sonner';
+import { User } from '@/types/User';
 
-const initialState = {
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    dob: '',
-    phoneNumber: '',
-    address: '',
-    bio: '',
-    avatar: '',
-};
-
-export default function SignupPage() {
-    const [form, setForm] = useState(initialState);
+function Page() {
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [captcha, setCaptcha] = useState('');
+    const [acceptTC, setAcceptTC] = useState(false)
 
     // Generate a random 5-character captcha
     const generateCaptcha = () => {
@@ -39,17 +33,21 @@ export default function SignupPage() {
         generateCaptcha();
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
+    const { register, handleSubmit, formState: { errors }, setValue } = useForm({
+        resolver: zodResolver(UserModel),
+    });
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // Handle form submission logic here
-        alert('Signup successful!');
+    const onSubmit = (data: User) => {
+        if(data.captcha!==captcha){
+            toast.warning("Invaild Captcha",{description: "Please enter vaild captcha code."})
+        }
+        if(data.password!==data.confirmPassword){
+            toast.warning("Password not match",{description: "Password not Confirm Password are not same."})
+        }
+        console.log(data);
     };
-
     return (
+
         <main className="min-h-screen flex items-center justify-center "
             style={{
                 backgroundImage: "url('/images/ant-rozetsky-HXOllTSwrpM-unsplash.jpg')",
@@ -68,7 +66,7 @@ export default function SignupPage() {
                     <h3 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">
                         Create your account
                     </h3>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         {/* Name */}
                         <div>
                             <label className="block text-gray-700 dark:text-gray-200 mb-1" htmlFor="name">
@@ -78,14 +76,13 @@ export default function SignupPage() {
                                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 type="text"
                                 id="name"
-                                name="name"
-                                value={form.name}
-                                onChange={handleChange}
-                                required
+                                {...register("name")} // behavour like name attributey
                                 autoComplete="name"
                                 placeholder="John Doe"
                             />
+                            {errors.name && <span className='text-sm font-semibold text-red-500'>{errors.name.message}</span>}
                         </div>
+
                         {/* Email */}
                         <div>
                             <label className="block text-gray-700 dark:text-gray-200 mb-1" htmlFor="email">
@@ -95,13 +92,12 @@ export default function SignupPage() {
                                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 type="email"
                                 id="email"
-                                name="email"
-                                value={form.email}
-                                onChange={handleChange}
-                                required
+                                {...register("email")}
                                 autoComplete="email"
                                 placeholder="johndoe@email.com"
                             />
+                            {errors.email && <span className='text-sm font-semibold text-red-500'>{errors.email.message}</span>}
+
                         </div>
 
                         {/* Gender */}
@@ -113,10 +109,7 @@ export default function SignupPage() {
                                 <select
                                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none pr-10"
                                     id="gender"
-                                    name="gender"
-                                    value={form.gender || ''}
-                                    onChange={handleChange}
-                                    required
+                                    {...register("gender")}
                                     onFocus={e => {
                                         const arrow = e.currentTarget.parentElement?.querySelector('.select-arrow');
                                         if (arrow) arrow.classList.add('rotate-180');
@@ -126,7 +119,7 @@ export default function SignupPage() {
                                         if (arrow) arrow.classList.remove('rotate-180');
                                     }}
                                 >
-                                    <option value="" disabled>
+                                    <option value="Select gender">
                                         Select gender
                                     </option>
                                     <option value="Male">Male</option>
@@ -135,10 +128,11 @@ export default function SignupPage() {
                                 </select>
                                 <span className="select-arrow pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 transition-transform duration-300">
                                     <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                                        <path d="M6 8l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M6 8l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
                                 </span>
                             </div>
+                            {errors.gender && <span className='text-sm font-semibold text-red-500'>{errors.gender.message}</span>}
                         </div>
 
                         {/* Password */}
@@ -151,10 +145,7 @@ export default function SignupPage() {
                                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     type={showPassword ? 'text' : 'password'}
                                     id="password"
-                                    name="password"
-                                    value={form.password}
-                                    onChange={handleChange}
-                                    required
+                                    {...register("password")}
                                     autoComplete="new-password"
                                     placeholder="Enter password"
                                 />
@@ -167,7 +158,9 @@ export default function SignupPage() {
                                     {showPassword ? <IoEye className='w-6 h-6 mt-0.5' /> : <IoEyeOff className='w-6 h-6 mt-0.5' />}
                                 </button>
                             </div>
+                            {errors.password && <span className='text-sm font-semibold text-red-500'>{errors.password.message}</span>}
                         </div>
+
                         {/* Confirm Password */}
                         <div>
                             <label className="block text-gray-700 dark:text-gray-200 mb-1" htmlFor="confirmPassword">
@@ -176,25 +169,24 @@ export default function SignupPage() {
                             <div className="relative">
                                 <input
                                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    type={showConfirm ? 'text' : 'password'}
+                                    type={showConfirmPassword ? 'text' : 'password'}
                                     id="confirmPassword"
-                                    name="confirmPassword"
-                                    value={form.confirmPassword}
-                                    onChange={handleChange}
-                                    required
+                                    {...register("confirmPassword")}
                                     autoComplete="new-password"
                                     placeholder="Re-enter password"
                                 />
                                 <button
                                     type="button"
                                     className="absolute right-3 top-2 text-gray-500 dark:text-gray-300"
-                                    onClick={() => setShowConfirm((v) => !v)}
+                                    onClick={() => setShowConfirmPassword((v) => !v)}
                                     tabIndex={-1}
                                 >
-                                    {showConfirm ? <IoEye className='w-6 h-6 mt-0.5' /> : <IoEyeOff className='w-6 h-6 mt-0.5' />}
+                                    {showConfirmPassword ? <IoEye className='w-6 h-6 mt-0.5' /> : <IoEyeOff className='w-6 h-6 mt-0.5' />}
                                 </button>
                             </div>
+                            {errors.confirmPassword && <span className='text-sm font-semibold text-red-500'>{errors.confirmPassword.message}</span>}
                         </div>
+
                         {/* Date of Birth */}
                         <div>
                             <label className="block text-gray-700 dark:text-gray-200 mb-1" htmlFor="dob">
@@ -204,13 +196,14 @@ export default function SignupPage() {
                                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 type="date"
                                 id="dob"
-                                name="dob"
-                                value={form.dob}
-                                onChange={handleChange}
-                                required
-                                placeholder="YYYY-MM-DD"
+                                min={"1997-01-01"}
+                                max={new Date().toISOString().split('T')[0]}
+                                {...register("dob")}
+                                placeholder="DD-MM-YYYY"
                             />
+                            {errors.dob && <span className='text-sm font-semibold text-red-500'>{errors.dob.message}</span>}
                         </div>
+
                         {/* Phone Number */}
                         <div>
                             <label className="block text-gray-700 dark:text-gray-200 mb-1" htmlFor="phoneNumber">
@@ -219,17 +212,17 @@ export default function SignupPage() {
                             <input
                                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 type="tel"
+                                maxLength={15}
                                 id="phoneNumber"
-                                name="phoneNumber"
-                                value={form.phoneNumber}
-                                onChange={handleChange}
-                                required
+                                {...register("phoneNumber")}
                                 autoComplete="tel"
                                 placeholder="+1 234 567 8901"
                             />
+                            {errors.phoneNumber && <span className='text-sm font-semibold text-red-500'>{errors.phoneNumber.message}</span>}
                         </div>
+
                         {/* Optional Fields */}
-                        {/* Address */}
+                        {/* Address Fields */}
                         <div>
                             <label className="block text-gray-700 dark:text-gray-200 mb-1" htmlFor="address">
                                 Address <span className="text-xs text-gray-400">(optional)</span>
@@ -238,13 +231,13 @@ export default function SignupPage() {
                                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 type="text"
                                 id="address"
-                                name="address"
-                                value={form.address}
-                                onChange={handleChange}
+                                {...register("address")}
                                 autoComplete="street-address"
                                 placeholder="123 Main St, City"
                             />
+                            {errors.address && <span className='text-sm font-semibold text-red-500'>{errors.address.message}</span>}
                         </div>
+
                         {/* Bio */}
                         <div>
                             <label className="block text-gray-700 dark:text-gray-200 mb-1" htmlFor="bio">
@@ -253,47 +246,71 @@ export default function SignupPage() {
                             <textarea
                                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 id="bio"
-                                name="bio"
-                                value={form.bio}
-                                onChange={handleChange}
+                                {...register("bio")}
                                 rows={2}
                                 placeholder="Tell us about yourself"
                             />
+                            {errors.bio && <span className='text-sm font-semibold text-red-500'>{errors.bio.message}</span>}
                         </div>
+
                         {/* Avater */}
                         <div>
                             <label className="block text-gray-700 dark:text-gray-200 mb-1" htmlFor="avatar">
-                                Avatar <span className="text-xs text-gray-400">(optional, JPG/PNG, max 2MB)</span>
+                                Avatar <span className="text-xs text-gray-400">(optional, JPG/PNG, max 1MB)</span>
                             </label>
+                            {/* <input
+                                className="w-full rounded border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                type="file"
+                                id="avatar"
+                                accept='image/*'
+                                {...register("avatarMedia")}
+                                onChange={e => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+
+                                        if (file.size > 1 * 1024 * 1024) {
+                                            // alert('File size should be less than 2MB');
+                                            toast.warning("File size should be less than 1MB")
+                                            setAvatarPreview(null);
+                                            return;
+                                        }
+                                        setAvatarPreview(URL.createObjectURL(file));
+                                    } else {
+                                        setAvatarPreview(null);
+                                    }
+                                }}
+                            /> */}
                             <input
                                 className="w-full rounded border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                 type="file"
                                 id="avatar"
-                                name="avatar"
-                                accept="image/png, image/jpeg"
+                                accept="image/*"
+                                name='avatarMedia'
+                                // {...register("avatarMedia")} //You should not spread {...register("avatarMedia")} and also use setValue for the same field.
                                 onChange={e => {
                                     const file = e.target.files?.[0];
                                     if (file) {
-                                        if (file.size > 2 * 1024 * 1024) {
-                                            alert('File size should be less than 2MB');
-                                            return;
-                                        }
-                                        const reader = new FileReader();
-                                        reader.onloadend = () => {
-                                            setForm(f => ({ ...f, avatar: reader.result as string }));
-                                        };
-                                        reader.readAsDataURL(file);
+                                        setAvatarPreview(URL.createObjectURL(file));
+                                        // Update react-hook-form state so Zod can validate
+                                        setValue("avatarMedia", file, { shouldValidate: true });
+                                    } else {
+                                        setAvatarPreview(null);
+                                        setValue("avatarMedia", undefined, { shouldValidate: true });
                                     }
                                 }}
                             />
                             <p className="text-xs text-gray-400 mt-1">Upload a clear profile picture.</p>
+                            {typeof errors.avatarMedia?.message === "string" && <span className='text-sm font-semibold text-red-500'>{errors.avatarMedia.message}</span>}
                         </div>
+
                         {/* Avatar Preview */}
-                        {form.avatar && (
+                        {avatarPreview && (
                             <div className="flex justify-center mt-2">
                                 <Image
-                                    src={form.avatar}
+                                    src={avatarPreview}
                                     alt="Avatar Preview"
+                                    width={64}
+                                    height={64}
                                     className="w-16 h-16 rounded-full object-cover border-2 border-blue-400"
                                 />
                             </div>
@@ -314,18 +331,20 @@ export default function SignupPage() {
                                     readOnly
                                     tabIndex={-1}
                                     aria-label="Captcha code"
+                                    onCopy={e => e.preventDefault()}
                                 />
                                 <div className='relative w-full'>
                                     <input
                                         className="w-full px-4 py-2 h-10 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         type="text"
                                         id="captchaInput"
-                                        name="captchaInput"
-                                        value={form.captchaInput || ''}
-                                        onChange={e => setForm({ ...form, captchaInput: e.target.value })}
-                                        required
                                         autoComplete="off"
                                         placeholder="Enter captcha"
+                                        {...register("captcha")}
+                                    // onChange={(e) => {
+                                    //     // console.log(e.currentTarget.value)
+                                    //     setCaptchaValid(e.currentTarget.value === captcha)
+                                    // }}
                                     />
                                     <button
                                         type="button"
@@ -356,8 +375,9 @@ export default function SignupPage() {
                                 </div>
                             </div>
 
+                            <p className="text-xs text-gray-400 mt-1">Enter the code shown above.</p>
+                            {errors.captcha && <span className='text-sm font-semibold text-red-500'>{errors.captcha.message}</span>}
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">Enter the code shown above.</p>
 
                         {/* Terms and Conditions */}
                         <div className="flex items-center mt-2">
@@ -365,17 +385,19 @@ export default function SignupPage() {
                                 type="checkbox"
                                 id="terms"
                                 name="terms"
-                                required
                                 className="mr-2"
+                                onChange={() => setAcceptTC(!acceptTC)}
                             />
                             <label htmlFor="terms" className="text-gray-700 dark:text-gray-200 text-sm">
-                                I agree to the <a href="/terms" className="text-blue-600 hover:underline dark:text-blue-400">Terms and Conditions</a>
+                                I agree to the <a href="/terms" className="text-blue-600 hover:underline dark:text-blue-400">Terms and Conditions </a>
                             </label>
+                            {(!acceptTC)?<span className='text-sm font-semibold text-red-500'>(Accept to continue)</span>:""}
                         </div>
+
                         {/* Submit Button */}
-                        <button
+                        <button disabled={!acceptTC}
                             type="submit"
-                            className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors shadow-md mt-4"
+                            className={`w-full py-3 rounded-lg bg-gray-500 hover:bg-blue-700 text-white font-semibold transition-colors shadow-md mt-4`}
                         >
                             Sign Up
                         </button>
@@ -391,5 +413,7 @@ export default function SignupPage() {
             </div>
 
         </main >
-    );
+    )
 }
+
+export default Page

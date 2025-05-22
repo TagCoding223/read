@@ -1,9 +1,25 @@
 import {z} from "zod"
-const fileSchema = z
-    .instanceof(File, { message: "Avatar must be a file." })
-    .refine(file => file.size <= 5 * 1024 * 1024, { message: "Avatar file size must be 5MB or less." })
-    .refine(file => ["image/jpeg", "image/png", "image/webp"].includes(file.type), { message: "Avatar must be a JPEG, PNG, or WEBP image." });
+// const fileSchema = z
+//     .instanceof(File, { message: "Avatar must be a file." })
+//     .refine(file => file.size <= 5 * 1024 * 1024, { message: "Avatar file size must be 5MB or less." })
+//     .refine(file => ["image/jpeg", "image/png", "image/webp"].includes(file.type), { message: "Avatar must be a JPEG, PNG, or WEBP image." });
 
+// export const IMAGE_SCHEMA = z
+//   .instanceof(File)
+//   .refine(
+//     (file) =>
+//       [
+//         "image/png",
+//         "image/jpeg",
+//         "image/jpg",
+//         "image/svg+xml",
+//         "image/gif",
+//       ].includes(file.type),
+//     { message: "Invalid image file type" }
+//   );
+
+
+// Removed fileSchema as z.file() does not exist in Zod
 
 const phoneNumberSchemas: Record<string, z.ZodString> = {
     US: z.string({ required_error: "Phone number is required." })
@@ -27,12 +43,18 @@ export const UserModel = z.object({
         .string({ required_error: "Email is required." })
         .email({ message: "Invalid email address." }),
     country: z.enum(["US", "IN", "UK"], { required_error: "Country is required." }),
-    phoneNumber: z.string({ required_error: "Phone number is required." }),
+    // phoneNumber: z.coerce.number({ required_error: "Phone number is required." }),
+    phoneNumber: z.string({ required_error: "Phone number is required." }).min(6,"Enter a valid phone number"),
     password: z
         .string({ required_error: "Password is required." })
         .min(6, { message: "Password must be at least 6 characters." }),
+    confirmPassword: z
+        .string({ required_error: "Password is required." })
+        .min(6, { message: "Password must be at least 6 characters." }),
     gender: z.enum(["Male", "Female", "Other"], { required_error: "Gender is required." }),
-    avatarMedia: fileSchema,
+    address: z.string().optional(),
+    avatarMedia: z.any({required_error: "Select a image"}).optional(), // Replace IMAGE_SCHEMA with a generic schema or define your own
+    // avatarMedia: fileSchema
     avatarUrl: z
         .string({ required_error: "Avatar URL is required." })
         .url({ message: "Invalid URL format." }).optional(),
@@ -40,7 +62,7 @@ export const UserModel = z.object({
         .string({ required_error: "Bio is required." })
         .max(500, { message: "Bio must be 500 characters or less." }),
     dob: z
-        .date({ required_error: "Date of birth is required." })
+        .coerce.date({ required_error: "Date of birth is required." })
 }).superRefine((data, ctx) => {
     const schema = phoneNumberSchemas[data.country];
     if (schema) {
