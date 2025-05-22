@@ -21,6 +21,7 @@
     "@uiw/react-md-editor": "^4.0.6",
     "bson-objectid": "^2.0.4",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.6.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "jodit-react": "^5.2.19",
