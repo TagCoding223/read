@@ -4,7 +4,7 @@ import type { UploadApiResponse } from "cloudinary";
 export async function POST(req: Request) {
 
     const formData = await req.formData();
-    console.log(formData)
+    // console.log(formData)
     const avatar = formData.get('avatar') as File | null;
     if (!avatar) {
         return Response.json({ error: 'No file uploaded' }, { status: 400 });
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
         // console.log(result)
 
-        return Response.json({ url: result.secure_url, public_key: result.public_id }, { status: 200 });
+        return Response.json({ body:{url: result.secure_url, public_id: result.public_id }}, { status: 200 });
     } catch (error) {
         return Response.json({ error: "Upload failed", details: error }, { status: 500 });
     }

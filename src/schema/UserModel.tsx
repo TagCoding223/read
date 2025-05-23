@@ -1,5 +1,7 @@
 import {z} from "zod"
 
+const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).+$/;
+
 export const UserModel = z.object({
     id: z
         .string({ required_error: "ID is required." })
@@ -12,12 +14,26 @@ export const UserModel = z.object({
         .string({ required_error: "Email is required." })
         .email({ message: "Invalid email address." }),
     gender: z.enum(["Male", "Female", "Other"], { message: "Invalid value."}),
-    password: z.string({required_error: "Password is required."}).min(6,"Password must be at least 6 characters.").max(100,"Maxmium 100 characters alow."),
-    confirmPassword: z.string({required_error: "Password is required."}).min(6,"Password must be at least 6 characters.").max(100,"Maxmium 100 characters alow."),
+    password: z
+        .string({required_error: "Password is required."})
+        .min(6, "Password must be at least 6 characters.")
+        .max(100, "Maxmium 100 characters alow.")
+        .regex(
+            strongPasswordRegex,
+            "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character."
+        ),
+    confirmPassword: z
+        .string({required_error: "Password is required."})
+        .min(6, "Password must be at least 6 characters.")
+        .max(100, "Maxmium 100 characters alow.")
+        .regex(
+            strongPasswordRegex,
+            "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character."
+        ),
     dob: z
         .coerce.date({ required_error: "Date of birth is required." }),
-    phoneNumber: z.string({ required_error: "Phone number is required." }).min(6,"Enter a valid phone number"),
-    address: z.string().max(150,"Address not larger than 150 characters.").optional(),
+    phoneNumber: z.string({ required_error: "Phone number is required." }).min(6, "Enter a valid phone number"),
+    address: z.string().max(150, "Address not larger than 150 characters.").optional(),
     bio: z
         .string({ required_error: "Bio is required." })
         .max(500, { message: "Bio must be 500 characters or less." }),
@@ -31,5 +47,5 @@ export const UserModel = z.object({
         )
         .optional(),
     captcha: z.string({required_error: "Captcha is required"})
-})
+});
 

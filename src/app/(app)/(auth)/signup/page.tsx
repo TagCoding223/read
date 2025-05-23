@@ -10,13 +10,17 @@ import { UserModel } from '@/schema/UserModel';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from 'sonner';
 import { User } from '@/types/User';
+import { useRouter } from 'next/navigation';
+
 
 function Page() {
+    const router = useRouter()
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [captcha, setCaptcha] = useState('');
     const [acceptTC, setAcceptTC] = useState(false)
+    const [isSubmit, setIsSubmit] = useState(false)
 
     // Generate a random 5-character captcha
     const generateCaptcha = () => {
@@ -37,15 +41,97 @@ function Page() {
         resolver: zodResolver(UserModel),
     });
 
-    const onSubmit = (data: User) => {
-        if(data.captcha!==captcha){
-            toast.warning("Invaild Captcha",{description: "Please enter vaild captcha code."})
+    const onSubmit = async (data: User) => {
+        setIsSubmit(true)
+        if (data.password !== data.confirmPassword) {
+            toast.warning("Password not match", { description: "Password not Confirm Password are not same." })
+        } else if (data.captcha !== captcha) {
+            toast.warning("Invaild Captcha", { description: "Please enter vaild captcha code." })
+        } else {
+
+            // check user exist or not
+            const formData = new FormData();
+            formData.append("email", data.email)
+            const isUserExist = await fetch("/api/getUserByEmail", {
+                method: "POST",
+                body: formData
+            })
+
+            const response = await isUserExist.json()
+            if (response.user === null) {
+
+                let avatarUrl = ''
+                let avatarPublicId = ''
+
+                if (data.avatarMedia) {
+                    const formData = new FormData();
+                    if (data.avatarMedia) {
+                        formData.append("avatar", data.avatarMedia);
+                    }
+
+                    const uploadAvatarResponse = await fetch("/api/avatar/upload", {
+                        method: "POST",
+                        body: formData,
+                    })
+
+                    const uploadResult = await uploadAvatarResponse;
+                    if (uploadResult.status === 200) {
+                        const extract = await uploadResult.json()
+                        const { url, public_id } = await extract.body
+                        avatarUrl = url
+                        avatarPublicId = public_id
+                    }
+                }
+
+                // console.log("first: ",avatarUrl," ",avatarPublicId)
+
+                // create user
+                const formData = new FormData();
+                if (data) {
+                    formData.append("name", data.name)
+                    formData.append("address", data.address ?? "")
+                    formData.append("bio", data.bio)
+                    formData.append("dob", typeof data.dob === "string" ? data.dob : new Date(data.dob).toISOString())
+                    formData.append("email", data.email)
+                    formData.append("gender", data.gender)
+                    formData.append("password", data.password)
+                    formData.append("phoneNumber", data.phoneNumber)
+                    formData.append("avatarUrl", avatarUrl)
+                    formData.append("avatarPublicId", avatarPublicId)
+                }
+
+                console.log("statuts:", avatarUrl, avatarPublicId)
+                console.log(formData.get("avatarUrl"), " ", formData.get("avatarPublicId"))
+                const response = await fetch("/api/add_user", {
+                    method: "POST",
+                    body: formData
+                })
+
+                const result = await response.json()
+                console.log(result)
+                if (result.res && result.res !== null) {
+                    router.push('/verify-code')
+                } else {
+                    toast.warning("Something is wrong!", { description: "Please Try Again" })
+                }
+
+            } else {
+                toast.warning("Please sign in", { description: "User aleardy exist with this email." })
+            }
+
+            setIsSubmit(false)
         }
-        if(data.password!==data.confirmPassword){
-            toast.warning("Password not match",{description: "Password not Confirm Password are not same."})
-        }
-        console.log(data);
+
+        // await new Promise(() => {
+        //     setTimeout(() => {
+        //         alert("hello")
+        //     }, 5000)
+        // })
+        setIsSubmit(false)
+
+        // console.log(data);
     };
+
     return (
 
         <main className="min-h-screen flex items-center justify-center "
@@ -391,11 +477,11 @@ function Page() {
                             <label htmlFor="terms" className="text-gray-700 dark:text-gray-200 text-sm">
                                 I agree to the <a href="/terms" className="text-blue-600 hover:underline dark:text-blue-400">Terms and Conditions </a>
                             </label>
-                            {(!acceptTC)?<span className='text-sm font-semibold text-red-500'>(Accept to continue)</span>:""}
+                            {(!acceptTC) ? <span className='text-sm font-semibold text-red-500'>(Accept to continue)</span> : ""}
                         </div>
 
                         {/* Submit Button */}
-                        <button disabled={!acceptTC}
+                        <button disabled={((isSubmit===true) || (acceptTC===false) )?true:false}
                             type="submit"
                             className={`w-full py-3 rounded-lg bg-gray-500 hover:bg-blue-700 text-white font-semibold transition-colors shadow-md mt-4`}
                         >

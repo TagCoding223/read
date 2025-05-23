@@ -11,15 +11,28 @@ datasource db {
 
 // User Model for mongo db atlas
 model user {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  email       String
-  phoneNumber String
-  password    String
-  gender      String
-  avatar      String
-  bio         String
-  dob         DateTime?
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  email          String
+  phoneNumber    String
+  password       String
+  gender         String
+  avatarUrl      String
+  avatarPublicId String
+  bio            String
+  dob            DateTime?
+  createdAt      DateTime  @default(now())
+
+  userVerifyStatus userVerifyStatus?
+}
+
+model userVerifyStatus  {
+  id                     String  @id @default(auto()) @map("_id") @db.ObjectId
+  verificationCode       String
+  verificationCodeExpiry String
+  isVerified             Boolean @default(false)
+
+  user user @relation(fields: [id], references: [id], onDelete: Cascade)
 }
 
 // User Model for mysql
