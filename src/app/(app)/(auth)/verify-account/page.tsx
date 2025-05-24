@@ -1,9 +1,14 @@
 "use client"
+import { useSearchParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react'
 
 const Page = () => {
     const [timer, setTimer] = useState(0);
     const [resendDisabled, setResendDisabled] = useState(false);
+    const searchParams = useSearchParams();
+    const encodedUserId = searchParams.get("tempId") as string
+    const userId = Buffer.from(encodedUserId, 'base64').toString('ascii');
+    console.log("encodeId: ",encodedUserId," decodeId: ",userId)
 
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined;
@@ -20,7 +25,7 @@ const Page = () => {
     }, [timer, resendDisabled]);
 
     return (
-        <div className="fixed inset-0 bg-gradient-to-br from-blue-100/60 via-white/60 to-blue-300/60 dark:from-gray-900/80 dark:via-gray-800/80 dark:to-gray-900/80 backdrop-blur-md z-0">
+        <div className="inset-0 bg-gradient-to-br from-blue-100/60 via-white/60 to-blue-300/60 dark:from-gray-900/80 dark:via-gray-800/80 dark:to-gray-900/80 backdrop-blur-md z-0">
             <div className="relative z-10">
                 <div className="relative flex min-h-screen flex-col justify-center overflow-hidden py-12 px-2">
                     <div className="relative bg-white dark:bg-gray-900 border-4 backdrop-blur px-6 pt-10 pb-9 shadow-xl mx-auto w-full max-w-lg rounded-2xl">
@@ -30,7 +35,8 @@ const Page = () => {
                                     <p className='dark:text-gray-400'>Email Verification</p>
                                 </div>
                                 <div className="flex flex-row text-sm font-medium text-gray-400">
-                                    <p>We have sent a code to your email ba**@dipainhouse.com</p>
+                                    <p>We have sent a code to your email </p>
+                                    {/* ba**@dipainhouse.com */}
                                 </div>
                             </div>
 

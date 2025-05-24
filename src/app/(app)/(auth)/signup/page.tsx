@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from 'sonner';
 import { User } from '@/types/User';
 import { useRouter } from 'next/navigation';
-
+import { LoaderPinwheelIcon } from 'lucide-react';
 
 function Page() {
     const router = useRouter()
@@ -43,6 +43,7 @@ function Page() {
 
     const onSubmit = async (data: User) => {
         setIsSubmit(true)
+
         if (data.password !== data.confirmPassword) {
             toast.warning("Password not match", { description: "Password not Confirm Password are not same." })
         } else if (data.captcha !== captcha) {
@@ -63,6 +64,7 @@ function Page() {
                 let avatarUrl = ''
                 let avatarPublicId = ''
 
+                // Upload Avatar
                 if (data.avatarMedia) {
                     const formData = new FormData();
                     if (data.avatarMedia) {
@@ -100,8 +102,9 @@ function Page() {
                     formData.append("avatarPublicId", avatarPublicId)
                 }
 
-                console.log("statuts:", avatarUrl, avatarPublicId)
-                console.log(formData.get("avatarUrl"), " ", formData.get("avatarPublicId"))
+                // console.log("statuts:", avatarUrl, avatarPublicId)
+                // console.log(formData.get("avatarUrl"), " ", formData.get("avatarPublicId"))
+
                 const response = await fetch("/api/add_user", {
                     method: "POST",
                     body: formData
@@ -109,8 +112,19 @@ function Page() {
 
                 const result = await response.json()
                 console.log(result)
-                if (result.res && result.res !== null) {
-                    router.push('/verify-code')
+                if (result.userRes && result.userRes !== null) {
+                    // const id = "8KfA1XbsIwXmoq36SgawDSWv";
+                    const id = result.res.id;
+
+                    const idBytes = new TextEncoder().encode();
+                    console.log("id as bytes:", idBytes);
+
+                    const encodedId = Buffer.from(String(id)).toString('base64');
+
+                    // const encodedParams = new URLSearchParams();
+                    // encodedParams.append("id", encodeId);
+                    router.push(`/verify-account?tempId=${encodedId}`);
+
                 } else {
                     toast.warning("Something is wrong!", { description: "Please Try Again" })
                 }
@@ -125,8 +139,27 @@ function Page() {
         // await new Promise(() => {
         //     setTimeout(() => {
         //         alert("hello")
+
+        //         // testing
+        //         const id = "8KfA1XbsIwXmoq36SgawDSWv";
+
+        //         const idBytes = new TextEncoder().encode(id);
+        //         console.log("id as bytes:", idBytes);
+
+        //         // const encodeId = bcrypt.encodeBase64(idBytes, idBytes.length);
+        //         const encodedId = Buffer.from(String(id)).toString('base64');
+
+        //         console.log("encodeId: ", encodedId);
+
+        //         // const encodedParams = new URLSearchParams();
+        //         // encodedParams.append("id", encodeId);
+        //         router.push(`/verify-code?tempId=${encodedId}`);
+
+
+        //         setIsSubmit(false)
         //     }, 5000)
         // })
+
         setIsSubmit(false)
 
         // console.log(data);
@@ -141,12 +174,48 @@ function Page() {
                 backgroundPosition: 'center',
             }}
         >
+
             <div className='w-full flex justify-center' style={{
                 backgroundColor: "rgb(6, 8, 12,0.6)",
                 backgroundPositionX: "50%",
                 backgroundPositionY: "50%",
                 WebkitTapHighlightColor: "transparent"
             }}>
+
+                {/* loader */}
+                <div className={`fixed opacity-80 z-50 w-full h-full bg-gray-800 ${!isSubmit ? "hidden" : "block"}`}>
+                    <div className='flex flex-col w-full h-full justify-center items-center'>
+                        <div className='w-32 h-32 flex justify-center items-center'>
+                            <LoaderPinwheelIcon className='w-28 h-28 animate-spin' />
+                        </div>
+                        <p>
+                            Please wait
+                            <span className="inline-block w-6">
+                                <span className="dot-anim">.</span>
+                                <span className="dot-anim dot-anim2">.</span>
+                                <span className="dot-anim dot-anim3">.</span>
+                            </span>
+                            <style jsx>{`
+                                .dot-anim {
+                                    opacity: 0;
+                                    animation: blink 1.4s infinite both;
+                                }
+                                .dot-anim2 {
+                                    animation-delay: 0.2s;
+                                }
+                                .dot-anim3 {
+                                    animation-delay: 0.4s;
+                                }
+                                @keyframes blink {
+                                    0%, 80%, 100% { opacity: 0; }
+                                    40% { opacity: 1; }
+                                }
+                            `}</style>
+                        </p>
+                    </div>
+                </div>
+
+                {/* form container */}
                 <div className="w-full mx-2 md:max-w-2/4 p-8 rounded-xl shadow-lg bg-white dark:bg-gray-800 my-4">
                     <Image className='m-auto rounded' src={'/images/logo.png'} alt='logo' width={150} height={150} />
                     <h3 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">
@@ -283,7 +352,8 @@ function Page() {
                                 type="date"
                                 id="dob"
                                 min={"1997-01-01"}
-                                max={new Date().toISOString().split('T')[0]}
+                                // max={new Date().toISOString().split('T')[0]}
+                                max={new Date(Date.now() - ((24 * 365) * 10) * 60 * 60 * 1000).toISOString().split('T')[0]} // at least user 10 year old
                                 {...register("dob")}
                                 placeholder="DD-MM-YYYY"
                             />
@@ -481,7 +551,7 @@ function Page() {
                         </div>
 
                         {/* Submit Button */}
-                        <button disabled={((isSubmit===true) || (acceptTC===false) )?true:false}
+                        <button disabled={((isSubmit === true) || (acceptTC === false)) ? true : false}
                             type="submit"
                             className={`w-full py-3 rounded-lg bg-gray-500 hover:bg-blue-700 text-white font-semibold transition-colors shadow-md mt-4`}
                         >
