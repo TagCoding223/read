@@ -133,7 +133,6 @@ function Page() {
                 toast.warning("Please sign in", { description: "User aleardy exist with this email." })
             }
 
-            setIsSubmit(false)
         }
 
         // await new Promise(() => {

@@ -1,5 +1,5 @@
 import ObjectID from "bson-objectid";
-import { PrismaClient } from "../../../../generated/prisma"
+import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail } from "@/helper/sendVerificationEmail";
 
@@ -18,7 +18,6 @@ export async function POST(req: Request) {
     console.log(formData)
 
     if (formData) {
-        const prisma = new PrismaClient()
 
         const email = (formData.get("email") as string) || ''
 
@@ -52,7 +51,7 @@ export async function POST(req: Request) {
         // console.log("id: ", id)
 
         const hashedPassword = await bcrypt.hash(password, 10)
-        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
         const verificationCodeExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
         const userData = {

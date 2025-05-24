@@ -1,13 +1,11 @@
-import { PrismaClient } from "../../../../generated/prisma"
+import { prisma } from "@/lib/prisma"
 
 export async function POST(req:Request){
     const formData = await req.formData()
     if (formData) {
         const email = formData.get("email") as string | null
         if (email) {
-            console.log(email)
-            const prisma = new PrismaClient()
-            console.log("first")
+            
             const response = await prisma.user.findFirst({
                 where: {email}
             })
