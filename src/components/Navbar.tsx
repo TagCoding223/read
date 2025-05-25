@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
         { href: "/contact", label: "Contact" },
     ]
     const siteName = process.env.SITE_NAME
-    // const { data: session } = useSession();
+    const { data: session } = useSession();
     
     return (
         <nav className="w-full dark:[bg-blue-900 backdrop-blur] shadow-md backdrop-blur sticky top-0 z-50">

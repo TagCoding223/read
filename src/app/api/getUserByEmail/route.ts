@@ -11,7 +11,7 @@ export async function POST(req:Request){
             })
             
             if(response){
-                return Response.json({message: "User already exist with this email.", user: response},{status: 200})
+                return Response.json({message: "User exist with this email.", user: response},{status: 200})
             }else{
                 return Response.json({message: "User not exist.", user: response},{status: 404})
             }

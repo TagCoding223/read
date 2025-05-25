@@ -6,23 +6,73 @@ import React, { useEffect, useState } from 'react';
 import { FaGoogle, FaFacebookF, FaMicrosoft } from 'react-icons/fa';
 import { MdEmail } from "react-icons/md";
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod'
+import { signIn, useSession } from 'next-auth/react';
+import { toast } from 'sonner';
 
 export default function AuthPage() {
     const searchParams = useSearchParams();
     const signInParam = searchParams.get('signIn');
     const signUpParam = searchParams.get('signUp');
-    
+
     const [showSignIn, setShowSignIn] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
+    const { data: session } = useSession()
+    const router = useRouter()
 
-    useEffect(()=>{
-        if(signInParam=='true' && signUpParam==null){
+    const signinSchema = z.object({
+        email: z.string({ required_error: "Email is required." })
+            .email({ message: "Invalid email address." }),
+        password: z.string({ required_error: "password is required." }).min(1, "password is required.")
+    })
+
+    type signinForm = z.infer<typeof signinSchema>;
+
+    const { handleSubmit, register, formState: { errors } } = useForm({
+        resolver: zodResolver(signinSchema)
+    })
+
+    const onSignIn = async (data: signinForm) => {
+
+        const response = await signIn("credentials", {
+            redirect: false,
+            email: data.email,
+            password: data.password
+        }).then(res => {
+            return res
+        })
+
+        if (response) {
+            if (!response.ok) {
+                toast.warning(response.error)
+            }
+
+            if (!session?.user.isVerified) {
+                toast.info("Your account is not verified.")
+                const id = session?.user.id;
+
+                const idBytes = new TextEncoder().encode();
+                console.log("id as bytes:", idBytes);
+
+                const encodedId = Buffer.from(String(id)).toString('base64');
+                setTimeout(() => {
+                    router.push(`/verify-account?tempId=${encodedId}`)
+                }, 2000)
+            }
+
+        }
+    }
+
+    useEffect(() => {
+        if (signInParam == 'true' && signUpParam == null) {
             setShowSignIn(true)
-        }else if(signUpParam=='true' && signInParam==null){
+        } else if (signUpParam == 'true' && signInParam == null) {
             setShowSignIn(false)
         }
-    },[signInParam,signUpParam])
+    }, [signInParam, signUpParam])
 
     return (
         <div className="mt-2 min-h-screen flex items-center justify-center">
@@ -67,12 +117,12 @@ export default function AuthPage() {
                     }}
                 >
                     <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-400">Sign Up</h2>
-                    
+
                     <Link className="w-full flex items-center justify-center gap-3 bg-blue-600 text-white py-3 rounded-lg mb-4 font-semibold hover:bg-blue-700 transition" href={"/signup"}>
                         <MdEmail className='w-5 h-5' />
                         <span>Continue with Email</span>
                     </Link>
-                    
+
 
                     <div className="flex items-center w-full my-4">
                         <hr className="flex-grow border-gray-300" />
@@ -125,16 +175,22 @@ export default function AuthPage() {
                     }}
                 >
                     <h2 className="text-3xl font-bold mb-6 text-purple-700 dark:text-gray-400">Sign In</h2>
-                    <form className="w-full flex flex-col gap-4 mb-4">
+                    <form onSubmit={handleSubmit(onSignIn)} className="w-full flex flex-col gap-4 mb-4">
+                        {/* email */}
                         <input
                             type="email"
                             placeholder="Email"
+                            {...register("email")}
                             className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline focus:ring-2 focus:ring-gray-900 light:bg-white/60 backdrop-blur-sm dark:text-gray-300"
                         />
+                        {errors.email && <span className='text-sm font-semibold text-red-500'>{errors.email.message}</span>}
+
+                        {/* pasword */}
                         <div className="relative">
                             <input
                                 type={showPassword ? "text" : "password"}
                                 placeholder="Password"
+                                {...register("password")}
                                 className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline focus:ring-2 focus:ring-gray-900 light:bg-white/60 backdrop-blur-sm dark:text-gray-300 pr-12"
                             />
                             <button
@@ -151,6 +207,7 @@ export default function AuthPage() {
                                 )}
                             </button>
                         </div>
+                        {errors.password && <span className='text-sm font-semibold text-red-500'>{errors.password.message}</span>}
                         <button
                             type="submit"
                             className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition"

@@ -5,6 +5,8 @@ import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import Footer from "@/components/Footer";
 import { Toaster } from "sonner";
+import AuthProvider from "@/context/AuthProvider";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,27 +32,29 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body 
+      <AuthProvider>
+      <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
+          <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
-        <Navbar />
-        {children}
-        <Toaster />
-        <Footer />
-        </ThemeProvider>
+            <Navbar />
+            {children}
+            <Toaster />
+            <Footer />
+          </ThemeProvider>
       </body>
+      </AuthProvider>
     </html>
   );
 }
